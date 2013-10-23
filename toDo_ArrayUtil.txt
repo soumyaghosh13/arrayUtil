@@ -1,0 +1,133 @@
+Implement a ArrayUtil DataType and methods around it.
+The ArrayUtil contains an array, element size and how many elements are there.
+
+ArrayUtil create(int elementSize, int elements) 
+ will create an array and wrap it with the ArrayUtil and return it.
+
+ArrayUtil resize(ArrayUtil util, int elements) 
+will resize the array and return the modified ArrayUtil. 
+
+The array contents should be trimmed if new size is less and copied over if the new size is more.
+
+--------------------------------------------------------------------------->>
+
+To use the array you just have to cast it to pointer of the respective type: like int* a, float* a ,etc and then a[5] will give you the fifth int or float.
+
+--------------------------------------------------------------------------->>
+
+Implement a findIndex method.
+
+int findIndex(ArrayUtil util, void* element).
+
+will return -1 if not found and the array index of the element if found.
+
+for example to search 5 in [4,2,1,5,6,0]
+int x = 5;
+
+findIndex(util, &x) will return 3 
+
+--------------------------------------------------------------------------->>
+
+Implement a method dispose to free the memory allocated for the Array inside array util.
+
+void dispose(ArrayUtil util).
+
+--------------------------------------------------------------------------->>
+
+Implement a findFirst method to find the first element matching the criteria.
+
+void* findFirst(ArrayUtil util, MatchFunc* match, void* hint);
+
+which returns the first element which matches the criteria or null if there is no match.
+
+where the signature of the MatchFunc is:
+
+int MatchFunc(void* hint, void* item);
+
+which will return 0 in case of no match and 1 in case of match.
+
+As C language does not have closure, we have some hint that can be passed, which will help in customizing the match.
+
+for example: 
+
+int isEven(void* hint, void* item)
+
+can be used to find if a given number is even. Here the hint is not needed.
+
+int isDivisible(void* hint, void* item)
+
+can be used to find if a given number is divisible by the number mentioned in the hint.
+
+--------------------------------------------------------------------------->>
+
+Implement a findLast method similar to findFirst.
+
+--------------------------------------------------------------------------->>
+
+Implement a count method to count the number of elements matching the criteria.
+
+int count(ArrayUtil util, MatchFunc* match, void* hint);
+
+---------------------------------------------------------------------------->>
+
+Implement a filter method to find the first n elements matching the criteria.
+
+int filter(ArrayUtil util, MatchFunc* match, void* hint, void** destination, int maxItems );
+
+where destination is an array of pointers into which the address of the matching elements are copied onto. maxitems is the capacity of destination.
+
+The method returns the number of elements which matches the criteria that have been copied onto the destination.
+
+---------------------------------------------------------------------------->>
+
+Implement a macro ARRAYUTIL(TYPE) to customize your ArrayUtil structure & methods to be used without the need of typecasting void pointers to the respective types.
+
+For example: ARRAYUTIL(int)
+
+makes available a structure ArrayUtil_int which has int* as data and not void*.
+
+It also gives methods like create_int(int elements), resize_int(int elements) which will return ArrayUtil_int
+
+---------------------------------------------------------------------------->>
+
+Implement a map method.
+
+void map(ArrayUtil source, ArrayUtil destination, ConvertFunc* convert, void* hint);
+
+maps source to destination using the provided convert function.
+
+where the signature of the ConvertFunc is:
+
+void ConvertFunc(void* hint, void* sourceItem, void* destinationItem);
+
+---------------------------------------------------------------------------->>
+
+Implement forEach method
+
+void forEach(ArrayUtil util, OperationFunc* operation, void* hint);
+
+performs operation on all items in the array.
+
+where the signature of the OperationFunc is:
+
+void OperationFunc(void* hint, void* item);
+
+---------------------------------------------------------------------------->>
+
+Implement reduce method
+
+void* reduce(ArrayUtil util, ReducerFunc* reducer, void* hint);
+
+returns the reduced answer.
+
+where the signature of ReducerFunc is:
+
+void* ReducerFunc(void* hint, void* item);
+
+which returns the current answer considering the hint and the current item.
+
+---------------------------------------------------------------------------->>
+
+
+
+---------------------------------------------------------------------------->>
