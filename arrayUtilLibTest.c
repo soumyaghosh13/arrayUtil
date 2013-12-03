@@ -5,6 +5,7 @@
 #include "testUtils.h"
 #include "arrayUtilLib.h"
 
+#define create_int()  create_int()
 //create setup, tearDown, fixtureSetup, fixtureTearDown methods if needed
 
 arrayUtil intInstance,floatInstance,charInstance,doubleInstance,expectedInstance;
@@ -246,12 +247,10 @@ void test_15_findFirst_should_find_first_element_for_INTEGERS(){
 	ASSERT(9 == *result);
 }
 
-int isLengthEqual(void* hint, void* item){
+int isLengthEqualTo(void* hint, void* item){
 	char* word = *(String*)item;
-	int newHint = *(int*) hint;
-	if(strlen(word)==newHint)
-		return 1;
-	return 0;
+	int length = *(int*) hint;
+	return length == strlen(word);
 }
 
 void test_16_findFirst_should_find_first_element_for_string(){
@@ -265,7 +264,7 @@ void test_16_findFirst_should_find_first_element_for_string(){
 	strcpy(base[0],"soumya");
 	strcpy(base[1],"kashish");
 	strcpy(base[2],"mohit");
-	result = findFirst(util, isLengthEqual, &hint);
+	result = findFirst(util, isLengthEqualTo, &hint);
 	res = strcmp(*result,"soumya");
 	if(res==0)
 		ASSERT(1);
@@ -299,7 +298,7 @@ void test_19_findLast_should_find_last_element_for_string(){
 	strcpy(base[0],"soumya");
 	strcpy(base[1],"kashish");
 	strcpy(base[2],"mohit");
-	result = findLast(util, isLengthEqual, &hint);
+	result = findLast(util, isLengthEqualTo, &hint);
 	res = strcmp(*result,"mohit");
 	if(res==0)
 		ASSERT(1);
@@ -332,7 +331,7 @@ void test_22_count_should_count_for_matched_element_for_STRING(){
 	strcpy(base[0],"soumya");
 	strcpy(base[1],"manish");
 	strcpy(base[2],"kashish");
-	result = count(util, isLengthEqual, &hint);
+	result = count(util, isLengthEqualTo, &hint);
 	ASSERT(2 == result);
 }
 
@@ -340,64 +339,98 @@ void test_22_count_should_count_for_matched_element_for_STRING(){
 // // 	ASSERT(0);
 // // }
 
-void test_23_filter_should_return_no_of_matched_element_for_integer(){
+void test_23_filters_all_numbers_divisible_by_2(){
 	arrayUtil util;
+	int* destination[10];
 	int result,i;
 	int* base;
-	void** destination;
-	int hint = 2;
-	util = create( sizeof(int), 5);
+	int _2 = 2;
+	util = create(sizeof(int), 5);
 	base = (int*)util.baseAddress;
-	destination = calloc(util.typeSize, 10);
 	base[0] = 21;
 	base[1] = 40;
 	base[2] = 20; 
 	base[3] = 67; 
 	base[4] = 44;
-	result = filter(util,isDivisible,&hint,destination,10);
+	result = filter(util,isDivisible,&_2,(void**)destination,10);
 	ASSERT(3 == result);
-	ASSERT(*(int*)destination[0] == 40);
-	ASSERT(*(int*)destination[1] == 20);
-	ASSERT(*(int*)destination[2] == 44);
-	free(destination);
+	ASSERT(*destination[0] == 40);
+	ASSERT(*destination[1] == 20);
+	ASSERT(*destination[2] == 44);
 }
 
-void test_24_filter_should_return_no_of_matched_element_for_float(){
+void test_24_filters_all_numbers_greater_than_20p35(){
 	arrayUtil util;
 	int result,i;
 	float* base;
-	void** destination;
-	float hint = 20.35;
-	util = create( sizeof(float),5);
+	float* destination[5];
+	float _20p35 = 20.35;
+	util = create(sizeof(float),5);
 	base = (float*)util.baseAddress;
-	destination = calloc( sizeof(float), 5);
 	base[0] = 21.00;
 	base[1] = 45.00;
 	base[2] = 21.00; 
 	base[3] = 67.00; 
 	base[4] = 45.00;
-	result = filter(util,isGreater,&hint,destination,5);
+	result = filter(util,isGreater,&_20p35,(void**)destination,5);
 	ASSERT(5 == result);
-	ASSERT(*(float*)destination[0] == 21.00);
-	ASSERT(*(float*)destination[4] == 45.000);
-	free(destination);
+	ASSERT(*destination[0] == 21.00);
+	ASSERT(*destination[4] == 45.000);
 }
 
-void test_25_filter_should_return_no_of_matched_element_for_String(){
+void test_25_filters_names_of_length_6(){
 	arrayUtil util;
 	int result = 0,i;
-	String* base;
-	void** destination;
-	int hint = 6;
+	String* src;
+	String* destination[4];
+	int _6 = 6;
 	util = create(sizeof(String),5);
-	base = (String*)util.baseAddress;
-	destination = calloc( sizeof(String),4);
-	strcpy(base[0],"Soumya");
-	strcpy(base[1],"Kashish");
-	strcpy(base[2],"Mohit");
-	strcpy(base[3],"Sandesh");
-	result = filter(util,isLengthEqual,&hint,destination,10);
+	src = (String*)util.baseAddress;
+	strcpy(src[0],"Soumya");
+	strcpy(src[1],"Kashish");
+	strcpy(src[2],"Mohit");
+	strcpy(src[3],"Sandesh");
+	result = filter(util,isLengthEqualTo,&_6,(void**)destination,4);
 	ASSERT(1 == result);
-	ASSERT(0 == strcmp(*(String*)destination[0],"Soumya"));
-	free(destination);
+	ASSERT(0 == strcmp(*destination[0],"Soumya"));
+}
+
+void excessThree(void *hint, void *sourceItem, void *destinationItem){
+	*(int*)destinationItem = *(int*)sourceItem + *(int*)hint;
+}
+
+void test_map_convert_values_and_put_those_values_to_destination_util(){
+	arrayUtil src,dst,expected;
+	int expectedElements[] = {4,5,6,7,8};
+	int hint = 3;
+	int i,result;
+	expected.baseAddress = expectedElements;
+	expected.typeSize = 4;
+	expected.length = 5;
+	src = create(sizeof(int),5);
+	for(i=0;i<5;i++)
+		*((int*)src.baseAddress+i) = i+1;
+	dst = create(sizeof(int),5);
+	map(src,dst,excessThree,&hint);
+	result = areEqual(expected,dst);
+	ASSERT(result);
+}
+
+void addOne(void* hint, void* item){
+	*(int*)hint = *(int*)item + *(int*)hint;
+}
+
+void test_forEach_add_one(){
+	arrayUtil src;
+	int hint = 1;
+	int i,result;
+	src = create(sizeof(int),5);
+	for(i=0;i<5;i++)
+		*((int*)src.baseAddress+i) = i+1;
+	forEach(src,addOne,&hint);
+	ASSERT(result);
+}
+
+void test_reduce_adding_elements_of_array(){
+	ASSERT(1);
 }

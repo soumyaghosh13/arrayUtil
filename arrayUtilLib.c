@@ -57,14 +57,12 @@ int lessThan(int item,int hint){
 int greaterThan(int item,int hint){
 	return item>hint;
 }
-void* find(Loop loop,arrayUtil util,MatchFunc* MatchFunc,void *hint){
+void* find(Loop loop,arrayUtil util,MatchFunc* match,void *hint){
 	int i;
 	void *item;
-	for(i=loop.start; loop.test(i,loop.length);i+=loop.step)
-	{
+	for(i=loop.start; loop.test(i,loop.length);i+=loop.step){
 		item = util.baseAddress+util.typeSize*i;
-		if(MatchFunc(hint,item))
-			return item;
+		if(match(hint,item)) return item;
 	}
 	return NULL;
 }
@@ -82,22 +80,43 @@ void* findLast(arrayUtil util, MatchFunc* match, void* hint){
 int count(arrayUtil util, MatchFunc* match, void* hint){
 	int i,count=0;
 	int typeSize = util.typeSize;
-	for(i=0; i<util.length; i++){
-		if(match(hint, util.baseAddress + (i * typeSize)))
-			count++;
-	}
-		return count;
+	for(i=0; i<util.length; i++)
+		count += match(hint, util.baseAddress + (i * typeSize));
+	
+	return count;
 }
 int filter(arrayUtil util, MatchFunc* match, void* hint, void** destination, int maxItems ){
 	int i,count = 0;
-    void* base = util.baseAddress;
-  for(i = 0;i < util.length; i++){
-    if(match(hint, base + i * util.typeSize)){
-        if(count<maxItems){
-          destination[count] = base + i * util.typeSize;
-          count++;
-        }
-    }
-  }
- return count;
+	void* base = util.baseAddress;
+	void* item;
+	for(i = 0;(i<util.length && count < maxItems); i++){
+		item = base + i*util.typeSize;
+		if(match(hint, item)) 
+			destination[count++] = item;
+	}
+	return count;
+}
+
+void map(arrayUtil source, arrayUtil destination, ConvertFunc* convert, void* hint){
+	int i;
+	for(i=0;i<source.length;i++){
+		convert(hint,source.baseAddress+(i*source.typeSize),
+			destination.baseAddress+(i*destination.typeSize));
+	}
+}
+
+void forEach(arrayUtil util, OperationFunc* operation, void* hint){
+	int i;
+	int item;
+	for(i=0; i < util.length;i++)
+		operation(hint,(void*)item);
+}
+
+void reduce(arrayUtil util, ReducerFunc* reducer, void* hint, void* result){
+	int i;
+	void* curr_address=util.baseAddress;
+	for (i = 0; i < util.length; ++i){
+		reducer( hint,  result,  curr_address);
+		curr_address+=util.typeSize;
+	}	
 }
